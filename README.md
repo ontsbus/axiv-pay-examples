@@ -16,6 +16,7 @@ Axiv Pay; this is not a self-hostable copy of its backend.
 | Endpoint | Authentication | Tools |
 | --- | --- | --- |
 | `https://pay.axiv.cc/public/mcp` | No token for discovery; your own Axiv Pay API token for payment tools | 12 tools, including quotes, payment creation, funding instructions, status and payment links |
+| `https://api.pay.axiv.cc/site/public/mcp` | The same caller API token rules | Explicit direct-Oracle alternative for the same 12 payment/discovery tools |
 | `https://pay.axiv.cc/mcp` | Per-client OAuth, scope `catalog:read` | Four read-only discovery tools; no payment privileges |
 
 An OAuth discovery login does not issue a payment API key. Obtain your own
@@ -38,6 +39,22 @@ cargo run --locked -- list
 cargo run --locked -- call search_capabilities requests/search.json
 cargo run --locked -- call check_payment_route requests/route.json
 ```
+
+The public Pages transport is under investigation for intermittent timeouts.
+On November 26, a paired 60-sample check saw 8/60 failures through the public
+MCP URL and 0/60 failures at the direct Oracle URL. Select the documented
+alternative explicitly when needed:
+
+```sh
+export AXIV_PAY_MCP_URL=https://api.pay.axiv.cc/site/public/mcp
+cargo run --locked -- list
+```
+
+This changes only the selected payment-MCP connection, not the service,
+database or authorization. There is no automatic fallback or write retry.
+Keep OAuth discovery at `https://pay.axiv.cc/mcp`; the direct payment endpoint
+does not replace that issuer or OAuth resource. The client permits exactly
+these two HTTPS URLs and rejects other overrides.
 
 These commands require no API key and move no funds. `list` returns the live
 tool descriptions and input schemas. The route example checks Base USDC →
@@ -88,7 +105,7 @@ Use `cargo run --locked -- call TOOL arguments.json --allow-write` only after
 reviewing the live schema. Read-only authenticated tools, including
 `get_payment_status`, still require your own API token.
 
-The client pins the production URL, refuses redirects, marks the token
+The client restricts connections to the two documented Axiv Pay URLs, refuses redirects, marks the token
 header sensitive, and performs no automatic retries. Any tool not explicitly
 marked read-only requires `--allow-write`. Preserve structured errors and
 idempotency state when adapting the example into your application. The generic

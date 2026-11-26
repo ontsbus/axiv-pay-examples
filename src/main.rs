@@ -3,10 +3,21 @@ use serde_json::{json, Value};
 use std::{env, error::Error, fs, io, time::Duration};
 
 const ENDPOINT: &str = "https://pay.axiv.cc/public/mcp";
+const DIRECT_ENDPOINT: &str = "https://api.pay.axiv.cc/site/public/mcp";
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 fn error(message: &str) -> Box<dyn Error> {
     io::Error::other(message).into()
+}
+
+fn selected_endpoint(value: Option<String>) -> Result<String> {
+    let value = value.unwrap_or_else(|| ENDPOINT.into());
+    if value != ENDPOINT && value != DIRECT_ENDPOINT {
+        return Err(error(
+            "AXIV_PAY_MCP_URL must be one of the two documented Axiv Pay HTTPS endpoints.",
+        ));
+    }
+    Ok(value)
 }
 
 struct Mcp {
@@ -113,7 +124,8 @@ fn run() -> Result<()> {
             "Usage: cargo run -- call TOOL arguments.json [--allow-write]",
         ));
     }
-    let mut mcp = Mcp::new(ENDPOINT, env::var("AXIV_PAY_API_TOKEN").ok())?;
+    let endpoint = selected_endpoint(env::var("AXIV_PAY_MCP_URL").ok())?;
+    let mut mcp = Mcp::new(&endpoint, env::var("AXIV_PAY_API_TOKEN").ok())?;
     mcp.rpc(
         "initialize",
         json!({"protocolVersion":"2026-07-28","capabilities":{},
@@ -163,6 +175,22 @@ mod tests {
         net::TcpListener,
         thread,
     };
+
+    #[test]
+    fn endpoint_selection_never_sends_a_token_to_an_arbitrary_override() {
+        assert_eq!(selected_endpoint(None).unwrap(), ENDPOINT);
+        assert_eq!(
+            selected_endpoint(Some(DIRECT_ENDPOINT.into())).unwrap(),
+            DIRECT_ENDPOINT
+        );
+        for invalid in [
+            "https://evil.example/public/mcp",
+            "https://pay.axiv.cc@evil.example/public/mcp",
+            "http://api.pay.axiv.cc/site/public/mcp",
+        ] {
+            assert!(selected_endpoint(Some(invalid.into())).is_err());
+        }
+    }
 
     #[test]
     fn writes_require_explicit_opt_in_and_payment_reads_still_require_a_token() {
