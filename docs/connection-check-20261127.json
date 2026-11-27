@@ -1,0 +1,47 @@
+{
+  "checkedOn": "2026-11-27",
+  "sampleType": "single-client-documentation-check",
+  "publisherObservation": true,
+  "canonical": {
+    "endpoint": "https://pay.axiv.cc/public/mcp",
+    "observedAt": "2026-11-27T08:20:01.894Z",
+    "toolsListed": 12,
+    "toolNames": [
+      "search_capabilities",
+      "get_capability",
+      "compare_capabilities",
+      "get_payment_status",
+      "check_payment_route",
+      "create_quote",
+      "create_payment",
+      "get_funding_step",
+      "submit_funding_transaction",
+      "create_payment_link",
+      "get_payment_link",
+      "get_usage"
+    ]
+  },
+  "directAlternative": {
+    "endpoint": "https://api.pay.axiv.cc/site/public/mcp",
+    "observedAt": "2026-11-27T08:20:08.941Z",
+    "toolsListed": 12
+  },
+  "search": {
+    "endpoint": "https://pay.axiv.cc/public/mcp",
+    "observedAt": "2026-11-27T08:20:08.214Z",
+    "tool": "search_capabilities",
+    "arguments": {
+      "role": "agent",
+      "asset": "USDC"
+    },
+    "isError": false,
+    "returnedTextBlocks": 1
+  },
+  "canonicalTransportHeader": "cloudflare-tunnel",
+  "healthStatus": "ok",
+  "tokenSupplied": false,
+  "paymentCreated": false,
+  "paymentLinkCreated": false,
+  "walletTransactionSent": false,
+  "limitation": "Read-only inventory and search checks. Not every tool was called; not an uptime SLA or payment/settlement evidence."
+}

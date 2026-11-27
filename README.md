@@ -6,10 +6,23 @@ stablecoin checkout or hosted payment links from Rust.
 - Product and account setup: <https://pay.axiv.cc/>
 - Agent quickstart: <https://pay.axiv.cc/docs/agent-quickstart/>
 - Official MCP Registry: [`cc.axiv/pay` 1.1.0](https://registry.modelcontextprotocol.io/v0.1/servers/cc.axiv%2Fpay/versions/1.1.0)
+- Glama connector: [Axiv Pay](https://glama.ai/mcp/connectors/cc.axiv/pay)
 - Machine-readable contract: <https://pay.axiv.cc/openapi.json>
 
 This repository contains client examples only. The payment service runs at
 Axiv Pay; this is not a self-hostable copy of its backend.
+
+## What you can build
+
+| Use case | Start here |
+| --- | --- |
+| Stablecoin payment links and QR checkout for a merchant's receiving wallet | [Payment-link example](#create-a-payment-link) and [merchant quickstart](https://pay.axiv.cc/docs/merchant-quickstart/) |
+| An AI agent that discovers routes, requests a quote and prepares a payment | [Agent quickstart](https://pay.axiv.cc/docs/agent-quickstart/) and [checkout flow](#integrate-checkout) |
+| Order fulfillment after checking the recipient, amount and payment status | [Checkout flow](#integrate-checkout) and [API reference](https://pay.axiv.cc/docs/api/) |
+
+Public discovery is free. The current Free plan has no signup fee or Axiv
+transaction fee within its allowance; route costs and network gas can apply.
+See [current pricing](https://pay.axiv.cc/pricing/) for limits and availability.
 
 ## Choose your connection
 
@@ -40,10 +53,15 @@ cargo run --locked -- call search_capabilities requests/search.json
 cargo run --locked -- call check_payment_route requests/route.json
 ```
 
-The public Pages transport is under investigation for intermittent timeouts.
-On November 26, a paired 60-sample check saw 8/60 failures through the public
-MCP URL and 0/60 failures at the direct Oracle URL. Select the documented
-alternative explicitly when needed:
+Use `https://pay.axiv.cc/public/mcp` as the default payment-MCP address.
+On November 27, its upstream transport moved to the existing Oracle service
+through a user-owned Cloudflare Tunnel. The post-cutover rollout recorded
+100/100 MCP reads and 100/100 health reads; these are bounded observations,
+not an uptime guarantee. [Connection status and evidence](docs/CONNECTION_STATUS.md)
+separate that rollout record from fresh checks and older incident history.
+
+The direct Oracle address remains an explicitly selected alternative for
+troubleshooting or a client that needs it:
 
 ```sh
 export AXIV_PAY_MCP_URL=https://api.pay.axiv.cc/site/public/mcp
